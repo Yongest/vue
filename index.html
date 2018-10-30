@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+</head>
+<body>
+<div id="app">
+<h2>hello {{aaa}}</h2>
+<p>vvvvv+{{ddd}}hahah</p>
+    <div v-html="tag" title="haha"></div>
+    <p v-text="msg" title="haha"></p>
+    <input v-model="msg">
+<br/>
+    <div v-aa='msg'></div>
+    <button v-on:click="fn">按钮</button>
+
+</div>
+<script src="./src/compile.js"></script>
+<script src="./src/vue.js"></script>
+<script>
+    const vm = new Vue({
+        el: '#app',
+        data: {
+            msg: 'hahahaha',
+            tag: '<h1>hello vue</h1>',
+            aaa:'vuevue',
+            ddd:'cccc'
+        },
+        methods:{
+            fn(){
+                console.log(this.$data.msg);
+            }
+        }
+    })
+</script>
+</body>
+</html>
