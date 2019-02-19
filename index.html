@@ -8,6 +8,9 @@
 <div id="app">
 <h2>hello {{aaa}}</h2>
 <p>vvvvv+{{ddd}}hahah</p>
+
+<p>{{car.color}}</p>
+<h2 v-html='car.color'></h2>
     <div v-html="tag" title="haha"></div>
     <p v-text="msg" title="haha"></p>
     <input v-model="msg">
@@ -16,6 +19,7 @@
     <button v-on:click="fn">按钮</button>
 
 </div>
+<script src="./src/ovserver.js"></script>
 <script src="./src/compile.js"></script>
 <script src="./src/vue.js"></script>
 <script>
@@ -25,7 +29,10 @@
             msg: 'hahahaha',
             tag: '<h1>hello vue</h1>',
             aaa:'vuevue',
-            ddd:'cccc'
+            ddd:'cccc',
+            car:{
+                color:'red'
+            }
         },
         methods:{
             fn(){

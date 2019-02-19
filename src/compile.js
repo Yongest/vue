@@ -7,10 +7,10 @@ class Compile {
         // vm:new的vue实例
         this.vm = vm
 
-        //    编译模板
-        if (this.el) {
+        //    编译模板,把插值表达式用数据替换。
+        if (this.el) { // 防止乱传一个选择器
             //1.把el中所有的子节点都放入到内存中，fragment
-            let fragment = this.node2fragment(this.el)
+            let fragment = this.nodeToFragment(this.el)
             // 2.在内存中编译fragment
             this.compile(fragment)
             //3.把fragment一次性添加到页面
@@ -18,8 +18,8 @@ class Compile {
         }
     }
 
-    /*核心方法*/
-    node2fragment(node) {
+    /*核心方法,把节点转换成文档碎片*/
+    nodeToFragment(node) {
         let fragment = document.createDocumentFragment()
         //    把el中所有的节点挨个添加到文档碎片中
 
@@ -31,7 +31,10 @@ class Compile {
         })
         return fragment
     }
-
+    /*工具方法*/
+    toArray(likeArr) {
+        return [].slice.call(likeArr)
+    }
     /**
      * 编译文档碎片（内存中）
      * @param fragment
@@ -73,9 +76,9 @@ class Compile {
                 let attrValue = attr.value
 
                 if (this.isEventDirective(type)) {
-                    CompileUtil['eventHandler'](node,type,this.vm,attrValue)
-                } else {  // 非指令
-                    CompileUtil[type]&&CompileUtil[type](node, this.vm, attrValue)
+                    CompileUtil['eventHandler'](node, type, this.vm, attrValue)
+                } else { // 非指令
+                    CompileUtil[type] && CompileUtil[type](node, this.vm, attrValue)
                 }
             }
         })
@@ -84,21 +87,11 @@ class Compile {
     // 解析文本节点
     compileText(node) {
 
-        // console.log('解析文本节点');
-        let txt = node.textContent
-        let reg = /\{\{(.+)\}\}/    //匹配换括号及里面的任意字符
-
-        if(reg.test(txt)){
-           let expr = RegExp.$1    //组元
-           node.textContent =txt.replace(reg,this.vm.$data[expr])
-        }
+        CompileUtil.mustache(node,this.vm)
 
     }
 
-    /*工具方法*/
-    toArray(likeArr) {
-        return [].slice.call(likeArr)
-    }
+
 
     isElementNode(node) {
         // nodeType:节点类型1：元素节点，3：文本节点
@@ -120,22 +113,41 @@ class Compile {
 }
 
 let CompileUtil = {
-    text(node, vm, attrValue){
-        node.textContent = vm.$data[attrValue]
+    mustache(node,vm) {
+        // console.log('解析文本节点');
+        let txt = node.textContent
+        let reg = /\{\{(.+)\}\}/ //匹配换括号及里面的任意字符
+
+        if (reg.test(txt)) {
+            let expr = RegExp.$1 //组元
+            node.textContent = txt.replace(reg,this.getVMvalue(vm,expr) )
+        }
     },
-    html(node, vm, attrValue){
-        node.innerHTML = vm.$data[attrValue]
+    text(node, vm, attrValue) {
+        node.textContent = this.getVMvalue(vm, attrValue)
     },
-    model(node, vm, attrValue){
-        node.value = vm.$data[attrValue]
+    html(node, vm, attrValue) {
+        node.innerHTML = this.getVMvalue(vm, attrValue)
     },
-    eventHandler(node,type,vm,attrValue){
+    model(node, vm, attrValue) {
+        node.value = this.getVMvalue(vm, attrValue)
+    },
+    eventHandler(node, type, vm, attrValue) {
         let eventType = type.split(':')[1]
-        let fn =  vm.$methods && vm.$methods[attrValue]
+        let fn = vm.$methods && vm.$methods[attrValue]
         //如果有事件跟事件函数
-        if(eventType && fn){
-            vm.$methods[attrValue] &&node.addEventListener(eventType,fn.bind(vm))
+        if (eventType && fn) {
+            vm.$methods[attrValue] && node.addEventListener(eventType, fn.bind(vm))
         }
 
+    },
+    // 这个方法用户获取VM里面的数据
+    getVMvalue(vm, expr) {
+        let data = vm.$data;
+        debugger
+        expr.split('.').forEach(key => {
+            data = data[key]
+        })
+        return data;
     }
 }

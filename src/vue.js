@@ -6,7 +6,7 @@ constructor(options={}) {
     this.$el = options.el
     this.$data = options.data
     this.$methods = options.methods
-
+    new Observer(this.$data)
     // 如果指定了el参数，对el进行解析
     if(this.$el){
         // compile负责解析模板的内容
